@@ -21,7 +21,9 @@ impl Controller for ParrotController {
         let mut drone = self.drone.take().unwrap();
         match drone.startup() {
             Ok(()) => {
-                thread::sleep(Duration::from_secs(3));
+                thread::sleep(Duration::from_secs(2));
+                drone.trim();
+                drone.use_ground_cam();
             }
             Err(s) => {
                 panic!(s);
@@ -50,6 +52,7 @@ impl Controller for ParrotController {
     }
 
     fn move_all(&mut self, left_right: f64, back_front: f64, down_up: f64, turn_left_right: f64) {
+        println!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right);
         let mut drone = self.drone.take().unwrap();
         drone.mov(
             left_right as f32,
