@@ -1,17 +1,20 @@
 use rust_drone_follow::traits::Controller;
 use parrot_ar_drone::Drone;
+use rust_drone_follow::text_exporter::TextExporter;
 
 use std::thread;
 use std::time::Duration;
 
 pub struct ParrotController {
     drone: Option<Drone>,
+    te: TextExporter,
 }
 
 impl ParrotController {
     pub fn new() -> ParrotController {
         ParrotController {
             drone: Some(Drone::new()),
+            te: TextExporter::new(),
         }
     }
 }
@@ -23,6 +26,7 @@ impl Controller for ParrotController {
             Ok(()) => {
                 thread::sleep(Duration::from_secs(2));
                 drone.trim();
+                thread::sleep(Duration::from_secs(2));
                 drone.use_ground_cam();
             }
             Err(s) => {
@@ -39,8 +43,11 @@ impl Controller for ParrotController {
     fn takeoff(&mut self) {
         let mut drone = self.drone.take().unwrap();
         drone.takeoff();
+        println!("Move UP!");
+        thread::sleep(Duration::from_secs(1));
         drone.mov_up(1.0);
-        thread::sleep(Duration::from_secs(2));
+        thread::sleep(Duration::from_secs(7));
+        println!("Now STOP!");
         drone.stop();
         self.drone.replace(drone);
     }
@@ -53,6 +60,8 @@ impl Controller for ParrotController {
 
     fn move_all(&mut self, left_right: f64, back_front: f64, down_up: f64, turn_left_right: f64) {
         println!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right);
+        self.te.save_row("commands.txt",
+        format!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right));
         let mut drone = self.drone.take().unwrap();
         drone.mov(
             left_right as f32,
