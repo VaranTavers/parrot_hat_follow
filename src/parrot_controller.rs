@@ -1,21 +1,34 @@
 use rust_drone_follow::traits::Controller;
-use parrot_ar_drone::Drone;
+use parrot_ar_drone::{Drone, NavDataValue};
 use rust_drone_follow::text_exporter::TextExporter;
 
 use std::thread;
 use std::time::Duration;
 
 pub struct ParrotController {
+    print_debug: bool,
+    flight_height: i32,
     drone: Option<Drone>,
     te: TextExporter,
 }
 
 impl ParrotController {
-    pub fn new() -> ParrotController {
+    pub fn new(flight_height: i32, debug: bool) -> ParrotController {
         ParrotController {
+            flight_height,
+            print_debug: debug,
             drone: Some(Drone::new()),
             te: TextExporter::new(),
         }
+    }
+
+    pub fn get_current_flight_height() -> i32 {
+        if let Some(r) = drone.get_navdata("demo_altitude") {
+            if let NavDataValue::Int(a) = r {
+                return a;
+            }
+        }
+        0
     }
 }
 
@@ -28,9 +41,14 @@ impl Controller for ParrotController {
                 drone.trim();
                 thread::sleep(Duration::from_secs(2));
                 drone.use_ground_cam();
+                match drone.get_navdata("demo_battery") {
+                    Some(NavDataValue::Uint(a)) => { println!("Battery: {}%", a); }
+                    _ => { println!("Battery status unknown!"); }
+                }
+                thread::sleep(Duration::from_secs(2));
             }
             Err(s) => {
-                panic!(s);
+                panic!("Drone startup failed!");
             }
         }
         self.drone.replace(drone);
@@ -43,11 +61,20 @@ impl Controller for ParrotController {
     fn takeoff(&mut self) {
         let mut drone = self.drone.take().unwrap();
         drone.takeoff();
-        println!("Move UP!");
-        thread::sleep(Duration::from_secs(1));
-        drone.mov_up(1.0);
-        thread::sleep(Duration::from_secs(7));
-        println!("Now STOP!");
+        thread::sleep(Duration::from_secs(3));
+        if self.print_debug {
+            println!("Move UP!");
+        }
+        let mut current_height = self.get_current_flight_height();
+        while current_height < self.flight_height {
+            drone.mov_up(0.5);
+            thread::sleep(Duration::from_millis(200));
+            current_height = self.get_current_flight_height();
+        }
+        if self.print_debug {
+            println!("Now STOP!");
+        }
+        drone.stop();
         drone.stop();
         self.drone.replace(drone);
     }
@@ -59,9 +86,11 @@ impl Controller for ParrotController {
     }
 
     fn move_all(&mut self, left_right: f64, back_front: f64, down_up: f64, turn_left_right: f64) {
-        println!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right);
-        self.te.save_row("commands.txt",
-        format!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right));
+        if self.print_debug {
+            println!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right);
+            self.te.save_row("commands.txt",
+                             format!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right));
+        }
         let mut drone = self.drone.take().unwrap();
         drone.mov(
             left_right as f32,
@@ -87,16 +116,18 @@ impl Controller for ParrotController {
     }
 
     fn get_opencv_url(&self) -> String {
+        // TODO: Get it from the drone
         String::from("tcp://192.168.1.1:5555")
     }
 
     fn get_kv(&self) -> f64 {
-        // NEEDS TESTING
-        0.01
+        // TODO: NEEDS TESTING
+        0.005
     }
 
     fn get_ka(&self) -> f64 {
-        // NEEDS TESTING
-        0.01
+        // Turning is currently turned off.
+        // TODO: NEEDS TESTING
+        0.0
     }
 }
