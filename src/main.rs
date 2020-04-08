@@ -31,9 +31,11 @@ fn main() {
     settings.save_to_file = Some(format!("video_{}.mp4", seconds));
     settings.center_threshold = 3.0;
     settings.min_change = 0.3;
+
+    let hat_file = "bayern.hat";
     // drone_test();
-    follow_test("piros.hat", settings);
-    // run_follow("piros.hat", settings);
+    follow_test(hat_file, settings);
+    // run_follow(hat_file, settings);
 }
 
 fn drone_test() {

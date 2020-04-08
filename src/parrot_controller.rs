@@ -1,10 +1,10 @@
-use rust_drone_follow::traits::Controller;
-use parrot_ar_drone::{Drone, NavDataValue};
-use rust_drone_follow::text_exporter::TextExporter;
-
 use std::thread;
 use std::time::Duration;
 use std::mem;
+
+use rust_drone_follow::traits::Controller;
+use rust_drone_follow::text_exporter::TextExporter;
+use parrot_ar_drone::{Drone, NavDataValue};
 
 pub struct ParrotController {
     print_debug: bool,
@@ -77,12 +77,12 @@ impl Controller for ParrotController {
                 drone.land();
                 thread::sleep(Duration::from_secs(10));
                 mem::drop(drone);
-                panic!("Stopping");
+                panic!("Height was not reached in time!");
             }
             i += 1;
         }
         if self.print_debug {
-            println!("Now STOP!");
+            println!("Stop moving up!");
         }
         drone.stop();
         drone.stop();
