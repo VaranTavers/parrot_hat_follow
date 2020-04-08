@@ -4,6 +4,7 @@ use rust_drone_follow::text_exporter::TextExporter;
 
 use std::thread;
 use std::time::Duration;
+use std::mem;
 
 pub struct ParrotController {
     print_debug: bool,
@@ -22,7 +23,7 @@ impl ParrotController {
         }
     }
 
-    pub fn get_current_flight_height() -> i32 {
+    pub fn get_current_flight_height(&mut self, drone: &mut Drone) -> i32 {
         if let Some(r) = drone.get_navdata("demo_altitude") {
             if let NavDataValue::Int(a) = r {
                 return a;
@@ -65,11 +66,20 @@ impl Controller for ParrotController {
         if self.print_debug {
             println!("Move UP!");
         }
-        let mut current_height = self.get_current_flight_height();
+        let mut current_height = self.get_current_flight_height(&mut drone);
+        let mut i = 0;
         while current_height < self.flight_height {
             drone.mov_up(0.5);
             thread::sleep(Duration::from_millis(200));
-            current_height = self.get_current_flight_height();
+            current_height = self.get_current_flight_height(&mut drone);
+            if i == 50 {
+                println!("{} cm was not reached within 10 seconds! (currently: {}) Stopping!", self.flight_height, current_height);
+                drone.land();
+                thread::sleep(Duration::from_secs(10));
+                mem::drop(drone);
+                panic!("Stopping");
+            }
+            i += 1;
         }
         if self.print_debug {
             println!("Now STOP!");

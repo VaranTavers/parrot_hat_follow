@@ -1,5 +1,6 @@
 use std::{thread, io};
 use std::num::ParseIntError;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use rust_drone_follow::HatFollower;
 use rust_drone_follow::detectors::naive_detector::NaiveDetector;
@@ -13,9 +14,9 @@ mod parrot_controller;
 mod mock_printer_controller;
 
 use parrot_controller::ParrotController;
-use std::time::Duration;
 use mock_printer_controller::MockPrinterController;
 use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
+use std::fmt::Error;
 
 fn read_int() -> Result<i32, ParseIntError> {
     let mut input_line = String::new();
@@ -24,9 +25,15 @@ fn read_int() -> Result<i32, ParseIntError> {
 }
 
 fn main() {
+    let system_time = SystemTime::now();
+    let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let mut settings = HatFollowerSettings::debug();
+    settings.save_to_file = Some(format!("video_{}.mp4", seconds));
+    settings.center_threshold = 3.0;
+    settings.min_change = 0.3;
     // drone_test();
-    // follow_test();
-    run_follow();
+    follow_test("piros.hat", settings);
+    // run_follow("piros.hat", settings);
 }
 
 fn drone_test() {
@@ -53,10 +60,8 @@ fn drone_test() {
     drone.land();
 }
 
-fn follow_test() {
-    let (vid, hat) = read_file("zold.hat");
-    let mut settings = HatFollowerSettings::debug();
-    settings.min_change = 0.3;
+fn follow_test(filename: &str, settings: HatFollowerSettings) {
+    let (vid, hat) = read_file(filename);
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
         MockPrinterController::new(vid.as_str(), 640, 368),
@@ -68,20 +73,16 @@ fn follow_test() {
     hf.run();
 }
 
-fn run_follow() {
+fn run_follow(filename: &str, settings: HatFollowerSettings) {
     let (mut sx, rx) = std::sync::mpsc::channel();
-    let (_, hat) = read_file("piros.hat");
-
-    let mut settings = HatFollowerSettings::debug();
-    settings.center_threshold = 3.0;
-    settings.min_change = 0.3;
+    let (_, hat) = read_file(filename);
 
     let handle = thread::spawn(|| {
         let mut hf = HatFollower::new(
             NaiveDetector::new(hat),
             ParrotController::new(220, true),
             MemoryFilter::new(),
-            HatFollowerSettings::debug(),
+            settings,
             Some(rx)
         );
 
