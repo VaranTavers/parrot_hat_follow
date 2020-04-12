@@ -29,13 +29,14 @@ fn main() {
     let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
     let mut settings = HatFollowerSettings::debug();
     settings.save_to_file = Some(format!("video_{}.mp4", seconds));
-    settings.center_threshold = 3.0;
-    settings.min_change = 0.3;
+    settings.save_commands = Some(format!("commands_{}.txt", seconds));
+    settings.center_threshold = 10.0;
+    settings.min_change = 0.05;
 
     let hat_file = "bayern.hat";
     // drone_test();
-    follow_test(hat_file, settings);
-    // run_follow(hat_file, settings);
+    // follow_test(hat_file, settings);
+    run_follow(hat_file, settings);
 }
 
 fn drone_test() {
@@ -67,7 +68,7 @@ fn follow_test(filename: &str, settings: HatFollowerSettings) {
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
         MockPrinterController::new(vid.as_str(), 640, 368),
-        MemoryFilter::new(),
+        MemoryFilter::new(100),
         settings,
         None,
     );
@@ -83,7 +84,7 @@ fn run_follow(filename: &str, settings: HatFollowerSettings) {
         let mut hf = HatFollower::new(
             NaiveDetector::new(hat),
             ParrotController::new(220, true),
-            MemoryFilter::new(),
+            MemoryFilter::new(100),
             settings,
             Some(rx)
         );

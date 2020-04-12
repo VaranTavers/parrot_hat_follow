@@ -118,7 +118,7 @@ impl Controller for ParrotController {
     }
 
     fn get_video_height(&self) -> usize {
-        368
+        360
     }
 
     fn get_video_width(&self) -> usize {
@@ -132,7 +132,7 @@ impl Controller for ParrotController {
 
     fn get_kv(&self) -> f64 {
         // TODO: NEEDS TESTING
-        0.005
+        0.003
     }
 
     fn get_ka(&self) -> f64 {
