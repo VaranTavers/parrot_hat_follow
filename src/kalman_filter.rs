@@ -30,17 +30,15 @@ impl KalmanFilter {
                                            0.0, 1.0, 0.0,
                                            0.0, 0.0, 1.0 ]),
                 // Observation matrix
-                h: Matrix::new(5, 3, vec![ 1.0, 0.0, 0.0,
-                            0.0, 1.0, 0.0,
-                            0.0, 0.0, 1.0,
-                            0.0, 0.0, 0.0,
-                            0.0, 0.0, 0.0 ]),
+                h: Matrix::new(3, 5, vec![1.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0, 0.0]),
                 // State transition matrix
-                f: Matrix::new(5, 5, vec![ 1.0, 0.0, 0.0, 0.0, 0.0,
-                            0.0, 1.0, 0.0, 0.0, 0.0,
+                f: Matrix::new(5, 5, vec![ 1.0, 0.0, 0.0, 1.0, 0.0,
+                            0.0, 1.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 1.0, 0.0, 0.0,
-                            1.0, 0.0, 0.0, 1.0, 0.0,
-                            0.0, 1.0, 0.0, 0.0, 1.0 ]),
+                            0.0, 0.0, 0.0, 1.0, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 1.0 ]),
                 // Initial guess for state mean at time 1
                 x0: Vector::new(vec![ 0.0, 0.0, 0.0, 0.0, 0.0 ]),
                 // Initial guess for state covariance at time 1
@@ -77,7 +75,8 @@ impl Filter for KalmanFilter {
 
                 self.point = Some(GeometricPoint::new(next.x[0] as i32, next.x[1] as i32));
                 self.angle = next.x[3];
-                println!("updated est");
+                println!("updated est: [{}, {}, {}, {}, {}]'", next.x[0],next.x[1],next.x[2],next.x[3],next.x[4]);
+                self.state = next;
             }
         }
     }
