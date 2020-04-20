@@ -31,7 +31,7 @@ fn main() {
     settings.save_to_file = Some(format!("video_{}.mp4", seconds));
     settings.save_commands = Some(format!("commands_{}.txt", seconds));
     settings.center_threshold = 10.0;
-    settings.min_change = 0.05;
+    settings.min_change = 0.00;
 
     let hat_file = "bayern.hat";
     // drone_test();

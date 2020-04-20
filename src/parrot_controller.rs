@@ -132,7 +132,7 @@ impl Controller for ParrotController {
 
     fn get_kv(&self) -> f64 {
         // TODO: NEEDS TESTING
-        0.003
+        0.002
     }
 
     fn get_ka(&self) -> f64 {
