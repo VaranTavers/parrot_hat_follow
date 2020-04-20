@@ -14,10 +14,11 @@ pub struct KalmanFilter {
     state: KS,
     point: Option<GeometricPoint>,
     angle: f64,
+    sigma_gain: f64,
 }
 
 impl KalmanFilter {
-    pub fn new() -> KalmanFilter {
+    pub fn new(sigma0: f64, sigma_gain: f64) -> KalmanFilter {
         KalmanFilter {
             filter : KF {
                 // Process noise covariance
@@ -51,16 +52,17 @@ impl KalmanFilter {
             },
             state: KS {
                 // Initial guess for state mean at time 1
-                x: Vector::new(vec![ 10.0, 10.0, 0.0, 1.0, 0.0 ]),
+                x: Vector::new(vec![ 0.0, 0.0, 0.0, 0.0, 0.0 ]),
                 // Initial guess for state covariance at time 1
-                p: Matrix::new(5, 5, vec![ 10.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 10.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 10.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 10.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 10.0 ]),
+                p: Matrix::new(5, 5, vec![sigma0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, sigma0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, sigma0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, sigma0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, sigma0]),
             },
             point: None,
             angle: 0.0,
+            sigma_gain,
         }
     }
 }
@@ -81,8 +83,7 @@ impl Filter for KalmanFilter {
                 }
             }
             None => {
-                let uncertainty_increase = 1.1;
-                self.state.p = &self.state.p * uncertainty_increase;
+                self.state.p = &self.state.p * self.sigma_gain;
             }
         }
     }

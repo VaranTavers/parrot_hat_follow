@@ -74,7 +74,7 @@ fn follow_test(filename: &str, settings: HatFollowerSettings) {
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
         MockPrinterController::new(vid.as_str(), 640, 368),
-        KalmanFilter::new(),
+        KalmanFilter::new(1.0, 1.1),
         settings,
         None,
     );
