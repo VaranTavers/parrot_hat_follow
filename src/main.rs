@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate rulinalg;
+extern crate linearkalman;
+
 use std::{thread, io};
 use std::num::ParseIntError;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -11,12 +15,14 @@ use rust_drone_follow::filters::memory_filter::MemoryFilter;
 use parrot_ar_drone::NavDataValue;
 
 mod parrot_controller;
+mod kalman_filter;
 mod mock_printer_controller;
 
 use parrot_controller::ParrotController;
 use mock_printer_controller::MockPrinterController;
 use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
 use std::fmt::Error;
+use crate::kalman_filter::KalmanFilter;
 
 fn read_int() -> Result<i32, ParseIntError> {
     let mut input_line = String::new();
@@ -35,8 +41,8 @@ fn main() {
 
     let hat_file = "bayern.hat";
     // drone_test();
-    // follow_test(hat_file, settings);
-    run_follow(hat_file, settings);
+    follow_test(hat_file, settings);
+    // run_follow(hat_file, settings);
 }
 
 fn drone_test() {
@@ -68,7 +74,7 @@ fn follow_test(filename: &str, settings: HatFollowerSettings) {
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
         MockPrinterController::new(vid.as_str(), 640, 368),
-        MemoryFilter::new(100),
+        KalmanFilter::new(),
         settings,
         None,
     );
