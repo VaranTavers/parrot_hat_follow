@@ -6,7 +6,8 @@ use rust_drone_follow::traits::Filter;
 use rust_drone_follow::geometric_point::GeometricPoint;
 use rust_drone_follow::marker_drawer::MarkerDrawer;
 use rust_drone_follow::opencv_custom::get_blue;
-use rulinalg::matrix::Matrix;
+use rulinalg::matrix::{Matrix, BaseMatrixMut, BaseMatrix};
+use std::ops::Index;
 
 pub struct KalmanFilter {
     filter: KF,
@@ -50,13 +51,13 @@ impl KalmanFilter {
             },
             state: KS {
                 // Initial guess for state mean at time 1
-                x: Vector::new(vec![ 0.0, 0.0, 0.0, 0.0, 0.0 ]),
+                x: Vector::new(vec![ 10.0, 10.0, 0.0, 1.0, 0.0 ]),
                 // Initial guess for state covariance at time 1
-                p: Matrix::new(5, 5, vec![ 1.0, 0.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 0.0, 1.0 ]),
+                p: Matrix::new(5, 5, vec![ 10.0, 0.0, 0.0, 0.0, 0.0,
+                             0.0, 10.0, 0.0, 0.0, 0.0,
+                             0.0, 0.0, 10.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0, 10.0, 0.0,
+                             0.0, 0.0, 0.0, 0.0, 10.0 ]),
             },
             point: None,
             angle: 0.0,
@@ -66,17 +67,22 @@ impl KalmanFilter {
 
 impl Filter for KalmanFilter {
     fn update_estimation(&mut self, point: Option<GeometricPoint>, angle: Option<f64>, cert: f64) {
-        if let Some(p) = point {
-            if let Some(a) = angle {
-                let (_pred, next) = filter_step(&self.filter,
-                                               &self.state,
-                                               &vector![p.x as f64, p.y as f64, a],
-                );
+        match point {
+            Some(p) => {
+                if let Some(a) = angle {
+                    let (next, _pred) = filter_step(&self.filter,
+                                                    &self.state,
+                                                    &vector![p.x as f64, p.y as f64, a],
+                    );
 
-                self.point = Some(GeometricPoint::new(next.x[0] as i32, next.x[1] as i32));
-                self.angle = next.x[3];
-                println!("updated est: [{}, {}, {}, {}, {}]'", next.x[0],next.x[1],next.x[2],next.x[3],next.x[4]);
-                self.state = next;
+                    self.point = Some(GeometricPoint::new(next.x[0] as i32, next.x[1] as i32));
+                    self.angle = next.x[3];
+                    self.state = next;
+                }
+            }
+            None => {
+                let uncertainty_increase = 1.1;
+                self.state.p = &self.state.p * uncertainty_increase;
             }
         }
     }
