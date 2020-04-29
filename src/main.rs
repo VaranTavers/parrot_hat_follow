@@ -9,20 +9,21 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use rust_drone_follow::HatFollower;
 use rust_drone_follow::detectors::naive_detector::NaiveDetector;
 use rust_drone_follow::hat_file_reader::read_file;
-use rust_drone_follow::filters::no_filter::NoFilter;
-use rust_drone_follow::filters::memory_filter::MemoryFilter;
+// use rust_drone_follow::filters::no_filter::NoFilter;
+// use rust_drone_follow::filters::memory_filter::MemoryFilter;
 
 use parrot_ar_drone::NavDataValue;
 
 mod parrot_controller;
 mod kalman_filter;
 mod mock_printer_controller;
+mod ui;
 
 use parrot_controller::ParrotController;
 use mock_printer_controller::MockPrinterController;
 use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
-use std::fmt::Error;
 use crate::kalman_filter::KalmanFilter;
+use iced::{Sandbox, Settings};
 
 fn read_int() -> Result<i32, ParseIntError> {
     let mut input_line = String::new();
@@ -41,8 +42,10 @@ fn main() {
 
     let hat_file = "bayern.hat";
     // drone_test();
-    follow_test(hat_file, settings);
+    // follow_test(hat_file, settings);
     // run_follow(hat_file, settings);
+
+    ui::SettingsEditor::run(Settings::default());
 }
 
 fn drone_test() {
@@ -74,7 +77,7 @@ fn follow_test(filename: &str, settings: HatFollowerSettings) {
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
         MockPrinterController::new(vid.as_str(), 640, 368),
-        KalmanFilter::new(1.0, 1.1),
+        KalmanFilter::new(1.0, 1.1, 1.0),
         settings,
         None,
     );
@@ -90,7 +93,7 @@ fn run_follow(filename: &str, settings: HatFollowerSettings) {
         let mut hf = HatFollower::new(
             NaiveDetector::new(hat),
             ParrotController::new(220, true),
-            MemoryFilter::new(100),
+            KalmanFilter::new(1.0, 1.1, 1.0),
             settings,
             Some(rx)
         );

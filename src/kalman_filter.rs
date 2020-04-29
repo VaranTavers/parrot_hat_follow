@@ -6,8 +6,7 @@ use rust_drone_follow::traits::Filter;
 use rust_drone_follow::geometric_point::GeometricPoint;
 use rust_drone_follow::marker_drawer::MarkerDrawer;
 use rust_drone_follow::opencv_custom::get_blue;
-use rulinalg::matrix::{Matrix, BaseMatrixMut, BaseMatrix};
-use std::ops::Index;
+use rulinalg::matrix::{Matrix};
 
 pub struct KalmanFilter {
     filter: KF,
@@ -18,7 +17,12 @@ pub struct KalmanFilter {
 }
 
 impl KalmanFilter {
-    pub fn new(sigma0: f64, sigma_gain: f64) -> KalmanFilter {
+    /// Creates a new KalmanFilter with the given properties.
+    /// Parameters:
+    /// sigma0: is the uncertainty of the initial estimation (p0 will be an eye(sigma0))
+    /// sigma_gain: is the factor with which uncertainty grows in case the hat is not detected on the screen (1.0 means no change)
+    /// est_v_loss: is the factor with which the Kalman Filter estimates loss in vx, vy (due to the drone adapting to the moving hat) (1.0 means no change)
+    pub fn new(sigma0: f64, sigma_gain: f64, est_v_loss: f64) -> KalmanFilter {
         KalmanFilter {
             filter : KF {
                 // Process noise covariance
@@ -39,8 +43,8 @@ impl KalmanFilter {
                 f: Matrix::new(5, 5, vec![ 1.0, 0.0, 0.0, 1.0, 0.0,
                             0.0, 1.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 1.0, 0.0, 0.0,
-                            0.0, 0.0, 0.0, 1.0, 0.0,
-                            0.0, 0.0, 0.0, 0.0, 1.0 ]),
+                            0.0, 0.0, 0.0, est_v_loss, 0.0,
+                            0.0, 0.0, 0.0, 0.0, est_v_loss ]),
                 // Initial guess for state mean at time 1
                 x0: Vector::new(vec![ 0.0, 0.0, 0.0, 0.0, 0.0 ]),
                 // Initial guess for state covariance at time 1
@@ -68,7 +72,7 @@ impl KalmanFilter {
 }
 
 impl Filter for KalmanFilter {
-    fn update_estimation(&mut self, point: Option<GeometricPoint>, angle: Option<f64>, cert: f64) {
+    fn update_estimation(&mut self, point: Option<GeometricPoint>, angle: Option<f64>, _cert: f64) {
         match point {
             Some(p) => {
                 if let Some(a) = angle {
