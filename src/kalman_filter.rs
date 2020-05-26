@@ -32,9 +32,9 @@ impl KalmanFilter {
                                            0.0, 0.0, 0.0, 1.0, 0.0,
                                            0.0, 0.0, 0.0, 0.0, 1.0 ]),
                 // Measurement noise matrix
-                r: Matrix::new(3, 3, vec![ 1.0, 0.0, 0.0,
-                                           0.0, 1.0, 0.0,
-                                           0.0, 0.0, 1.0 ]),
+                r: Matrix::new(3, 3, vec![ 5.0, 0.0, 0.0,
+                                           0.0, 5.0, 0.0,
+                                           0.0, 0.0, 10.0 ]),
                 // Observation matrix
                 h: Matrix::new(3, 5, vec![1.0, 0.0, 0.0, 0.0, 0.0,
                         0.0, 1.0, 0.0, 0.0, 0.0,

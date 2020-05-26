@@ -15,15 +15,25 @@ use rust_drone_follow::hat_file_reader::read_file;
 use parrot_ar_drone::NavDataValue;
 
 mod parrot_controller;
+mod virtual_controller;
+
 mod kalman_filter;
-mod mock_printer_controller;
 mod ui;
+mod ui_old;
+mod step;
+mod picture_recorder;
+mod picture_funcs;
+mod file_readers;
+mod tour;
+
+mod move_tactic_trait;
+mod stand_still;
 
 use parrot_controller::ParrotController;
-use mock_printer_controller::MockPrinterController;
 use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
 use crate::kalman_filter::KalmanFilter;
 use iced::{Sandbox, Settings};
+use rust_drone_follow::controllers::mock_controller::MockController;
 
 fn read_int() -> Result<i32, ParseIntError> {
     let mut input_line = String::new();
@@ -32,20 +42,24 @@ fn read_int() -> Result<i32, ParseIntError> {
 }
 
 fn main() {
-    let system_time = SystemTime::now();
-    let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let mut settings = HatFollowerSettings::debug();
-    settings.save_to_file = Some(format!("video_{}.mp4", seconds));
-    settings.save_commands = Some(format!("commands_{}.txt", seconds));
-    settings.center_threshold = 10.0;
-    settings.min_change = 0.00;
+    // let system_time = SystemTime::now();
+    // let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
+    // let mut settings = HatFollowerSettings::debug();
+    // settings.save_to_file = Some(format!("video_{}.mp4", seconds));
+    // settings.save_commands = Some(format!("commands_{}.txt", seconds));
+    // settings.center_threshold = 10.0;
+    // settings.min_change = 0.00;
 
-    let hat_file = "bayern.hat";
+    // let hat_file = "bayern.hat";
     // drone_test();
     // follow_test(hat_file, settings);
-    // run_follow(hat_file, settings);
+    //run_follow(hat_file, settings);
 
-    ui::SettingsEditor::run(Settings::default());
+    //ui::SettingsEditor::run(Settings::default());
+    println!("Starting up the UI");
+    let mut iced_settings = Settings::<()>::default();
+    iced_settings.window.size = (560, 700);
+    tour::Tour::run(iced_settings);
 }
 
 fn drone_test() {
@@ -76,7 +90,7 @@ fn follow_test(filename: &str, settings: HatFollowerSettings) {
     let (vid, hat) = read_file(filename);
     let mut hf = HatFollower::new(
         NaiveDetector::new(hat),
-        MockPrinterController::new(vid.as_str(), 640, 368),
+        MockController::new(vid.as_str(), 640, 368),
         KalmanFilter::new(1.0, 1.1, 1.0),
         settings,
         None,

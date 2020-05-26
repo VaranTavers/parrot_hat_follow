@@ -5,10 +5,13 @@ use std::mem;
 use rust_drone_follow::traits::Controller;
 use rust_drone_follow::text_exporter::TextExporter;
 use parrot_ar_drone::{Drone, NavDataValue};
+use opencv::videoio::{VideoCapture, CAP_ANY, VideoCaptureTrait};
+use opencv::core::Mat;
 
 pub struct ParrotController {
     print_debug: bool,
     flight_height: i32,
+    video: VideoCapture,
     drone: Option<Drone>,
     te: TextExporter,
 }
@@ -18,6 +21,7 @@ impl ParrotController {
         ParrotController {
             flight_height,
             print_debug: debug,
+            video: VideoCapture::from_file("tcp://192.168.1.1:5555", CAP_ANY).unwrap(),
             drone: Some(Drone::new()),
             te: TextExporter::new(),
         }
@@ -125,14 +129,13 @@ impl Controller for ParrotController {
         640
     }
 
-    fn get_opencv_url(&self) -> String {
-        // TODO: Get it from the drone
-        String::from("tcp://192.168.1.1:5555")
+    fn get_next_frame(&mut self, img: &mut Mat) -> opencv::Result<bool> {
+        self.video.read(img)
     }
 
     fn get_kv(&self) -> f64 {
         // TODO: NEEDS TESTING
-        0.002
+        0.003
     }
 
     fn get_ka(&self) -> f64 {
