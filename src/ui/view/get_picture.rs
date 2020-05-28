@@ -1,5 +1,6 @@
 use iced::{Column, Text, Button, Row, Align};
 use iced::button::State as ButtonState;
+
 use crate::ui::step_message::StepMessage;
 
 pub fn get_picture<'a>(container: Column<'a, StepMessage>, (ts, ps, ls): (&'a mut ButtonState, &'a mut ButtonState, &'a mut ButtonState)) -> Column<'a, StepMessage> {

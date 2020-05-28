@@ -1,6 +1,7 @@
-use crate::step::Step;
 use iced::{scrollable, button, Sandbox, Element, text_input, Row, Space, Length, Column, Scrollable, Container, Button, Text};
-use crate::ui::step_message::StepMessage;
+
+use super::step::Step;
+use super::step_message::StepMessage;
 
 pub struct Tour {
     steps: Steps,

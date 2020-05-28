@@ -13,11 +13,24 @@ use rust_drone_follow::hat_file_reader::read_file;
 use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
 use rust_drone_follow::text_exporter::TextExporter;
 
-use crate::picture_recorder::picture_recorder;
-use crate::parrot_controller::ParrotController;
-use crate::picture_funcs::{get_color_from_strings, mask_image};
+use super::step_message::{StepMessage, DefaultSetting};
+use super::view::welcome::welcome;
+use super::view::get_picture::get_picture;
+use super::view::set_hat_color::set_hat_color;
+use super::view::set_kalman_settings::set_kalman_settings;
+use super::view::set_follower_settings::set_follower_settings;
+use super::view::run::run;
+
+use crate::utils::picture_recorder::picture_recorder;
+use crate::utils::picture_funcs::{get_color_from_strings, mask_image};
+
+use crate::parrot::parrot_controller::ParrotController;
+
+use crate::simulation::virtual_controller::VirtualController;
+use crate::simulation::movetactics::stand_still::StandStill;
+
 use crate::kalman_filter::KalmanFilter;
-use crate::ui::step_message::{StepMessage, DefaultSetting};
+
 
 pub enum Step {
     Welcome,
@@ -284,7 +297,8 @@ impl<'a> Step {
                         *join_handle = Some(thread::spawn(move || {
                             let mut hf = HatFollower::new(
                                 NaiveDetector::new(hat),
-                                ParrotController::new(300, true),
+                                VirtualController::new(100.0, 0, StandStill::new(), false),
+                                // ParrotController::new(300, true),
                                 KalmanFilter::new(sigma0, sigma_gain, est_v_loss),
                                 settings,
                                 Some(rx)
@@ -333,12 +347,12 @@ impl<'a> Step {
 
     pub fn view(&mut self) -> Element<StepMessage> {
         match self {
-            Step::Welcome => crate::ui::welcome::welcome(Self::container()),
+            Step::Welcome => welcome(Self::container()),
             Step::GetPicture { takeoff_state, picture_state, land_state, .. } => {
-                crate::ui::get_picture::get_picture(Self::container(), (takeoff_state, picture_state, land_state))
+                get_picture(Self::container(), (takeoff_state, picture_state, land_state))
             }
             Step::SetHatColor {hls, has, hbs, lls, las, lbs, l_high_input, a_high_input, b_high_input, l_low_input, a_low_input, b_low_input, save_hat, masked_img, size, size_input, ..} => {
-                crate::ui::set_hat_color::set_hat_color(
+                set_hat_color(
                     Self::container(),
                     (hls, has, hbs, lls, las, lbs, size),
                     (l_high_input, a_high_input, b_high_input, l_low_input, a_low_input, b_low_input, size_input, save_hat),
@@ -346,14 +360,14 @@ impl<'a> Step {
                 )
             }
             Step::SetKalmanSettings {sigma_0, sigma_gain, est_v_loss, s0_input, sg_input, vl_input, save_kalman} => {
-                crate::ui::set_kalman_settings::set_kalman_settings(
+                set_kalman_settings(
                     Self::container(),
                     (sigma_0, sigma_gain, est_v_loss),
                     (s0_input, sg_input, vl_input, save_kalman)
                 )
             }
             Step::SetFollowerSettings {min_change, center_threshold, mc_input, ct_input, save_follower, setting} => {
-                crate::ui::set_follower_settings::set_follower_settings(
+                set_follower_settings(
                     Self::container(),
                     (min_change, center_threshold),
                     (mc_input, ct_input, save_follower),
@@ -361,7 +375,7 @@ impl<'a> Step {
                 )
             }
             Step::Run {start_button, stop_button, ..} => {
-                crate::ui::run::run(
+                run(
                     Self::container(),
                     (start_button, stop_button)
                 )
