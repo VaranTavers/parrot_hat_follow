@@ -1,11 +1,10 @@
 use opencv::imgproc::{COLOR_BGR2Lab, cvt_color, contour_area};
 use opencv::core::*;
 use opencv::imgcodecs::{imread, IMREAD_COLOR, imwrite};
-use opencv::types::{VectorOfi32, VectorOfPoint};
+use opencv::types::{VectorOfi32};
 use opencv::prelude::Vector;
 
 use rust_drone_follow::opencv_custom::{LabColor, mat_size_of_other, get_mask, get_contours};
-use opencv::highgui::{imshow, wait_key};
 
 pub fn get_masked(a: &Mat, lower_bound: &LabColor, upper_bound: &LabColor) -> Mat {
     let mut hsv = mat_size_of_other(a);

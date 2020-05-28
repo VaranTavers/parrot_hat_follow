@@ -15,7 +15,7 @@ pub fn picture_recorder(rec: Receiver<i32>, url: String) {
             if a == 1 {
                 imwrite("image_chosen.png", &img, &VectorOfi32::new()).unwrap();
             } else {
-                opencv::highgui::destroy_all_windows();
+                opencv::highgui::destroy_all_windows().unwrap();
                 break;
             }
         }

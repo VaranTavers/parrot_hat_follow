@@ -1,13 +1,17 @@
 use std::time::{SystemTime, UNIX_EPOCH, Duration};
-use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
 use std::{thread, io};
+use std::num::ParseIntError;
+
+use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
 use rust_drone_follow::hat_file_reader::read_file;
 use rust_drone_follow::HatFollower;
 use rust_drone_follow::detectors::naive_detector::NaiveDetector;
 use rust_drone_follow::controllers::mock_controller::MockController;
+
+use crate::parrot::parrot_controller::ParrotController;
 use crate::kalman_filter::KalmanFilter;
+
 use parrot_ar_drone::NavDataValue;
-use std::num::ParseIntError;
 
 pub fn run_follow_test() {
 
@@ -45,7 +49,7 @@ pub fn drone_test() {
     let mut drone = parrot_ar_drone::Drone::new();
 
     println!("Instantiating done!");
-    drone.startup();
+    drone.startup().unwrap();
     println!("Takeoff in 5");
     thread::sleep(Duration::from_secs(5));
     match drone.get_navdata("demo_battery") {
@@ -65,7 +69,7 @@ pub fn drone_test() {
 }
 
 pub fn run_noui_follow(filename: &str, settings: HatFollowerSettings) {
-    let (mut sx, rx) = std::sync::mpsc::channel();
+    let (sx, rx) = std::sync::mpsc::channel();
     let (_, hat) = read_file(filename);
 
     let handle = thread::spawn(|| {
@@ -84,7 +88,7 @@ pub fn run_noui_follow(filename: &str, settings: HatFollowerSettings) {
         let i = read_int();
         match i {
             Ok(0) | Err(_) => {
-                sx.send(0);
+                sx.send(0).unwrap();
                 break;
             }
             Ok(_) => {

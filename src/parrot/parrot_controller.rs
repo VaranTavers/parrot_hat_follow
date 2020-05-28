@@ -53,7 +53,7 @@ impl Controller for ParrotController {
                 thread::sleep(Duration::from_secs(2));
             }
             Err(s) => {
-                panic!("Drone startup failed!");
+                panic!("Drone startup failed! Err: {}", s);
             }
         }
         self.drone.replace(drone);

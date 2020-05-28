@@ -8,7 +8,7 @@ mod simulation;
 mod ui;
 mod utils;
 
-use iced::{Sandbox, Settings};
+use iced::{Settings, Sandbox};
 use ui::tour::Tour;
 
 fn main() {
@@ -16,6 +16,6 @@ fn main() {
     println!("Starting up the UI");
     let mut iced_settings = Settings::<()>::default();
     iced_settings.window.size = (560, 700);
-    tour::Tour::run(iced_settings);
+    Tour::run(iced_settings);
 }
 

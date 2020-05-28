@@ -35,7 +35,7 @@ use crate::kalman_filter::KalmanFilter;
 pub enum Step {
     Welcome,
     GetPicture {
-        drone: Option<crate::parrot_controller::ParrotController>,
+        drone: Option<ParrotController>,
         takeoff_state: button::State,
         picture_state: button::State,
         land_state: button::State,
@@ -105,22 +105,22 @@ impl<'a> Step {
             }
             StepMessage::TakePicture => {
                 if let Step::GetPicture {sender_channel, ..} = self {
-                    let mut channel_option = sender_channel.take();
+                    let channel_option = sender_channel.take();
                     if let Some(sx) = channel_option {
-                        sx.send(1);
+                        sx.send(1).unwrap();
                         sender_channel.replace(sx);
                     }
                 }
             }
             StepMessage::Land => {
                 if let Step::GetPicture {drone, sender_channel, join_handle, ..} = self {
-                    let mut controller_option = drone.take();
+                    let controller_option = drone.take();
                     if controller_option.is_some() {
                         let mut controller = controller_option.unwrap();
-                        let mut sx = sender_channel.take().unwrap();
-                        let mut picture_thread = join_handle.take().unwrap();
-                        sx.send(0);
-                        picture_thread.join();
+                        let sx = sender_channel.take().unwrap();
+                        let picture_thread = join_handle.take().unwrap();
+                        sx.send(0).unwrap();
+                        picture_thread.join().unwrap();
                         controller.land();
                     }
                 }
@@ -158,7 +158,9 @@ impl<'a> Step {
             }
 
             StepMessage::Size(val) => {
-                // Maybe needed
+                if let Step::SetHatColor {size, ..} = self {
+                    *size = val;
+                }
             }
 
             StepMessage::SaveHat => {
@@ -291,7 +293,7 @@ impl<'a> Step {
                         };
 
 
-                        let (mut sx, rx) = std::sync::mpsc::channel();
+                        let (sx, rx) = std::sync::mpsc::channel();
                         let (_, hat) = read_file("config.hat");
                         // TODO: Load all files
                         *join_handle = Some(thread::spawn(move || {
@@ -313,10 +315,10 @@ impl<'a> Step {
             StepMessage::Stop => {
                 if let Step::Run {join_handle, sender_channel, ..} = self {
                     if join_handle.is_some() {
-                        let mut follower_thread = join_handle.take().unwrap();
-                        let mut sx = sender_channel.take().unwrap();
-                        sx.send(0);
-                        follower_thread.join();
+                        let follower_thread = join_handle.take().unwrap();
+                        let sx = sender_channel.take().unwrap();
+                        sx.send(0).unwrap();
+                        follower_thread.join().unwrap();
                     }
                 }
             }
