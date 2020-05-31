@@ -32,6 +32,10 @@ use crate::simulation::movetactics::stand_still::StandStill;
 use crate::kalman_filter::KalmanFilter;
 use crate::simulation::windtactics::constant_wind::ConstantWind;
 use crate::simulation::windtactics::no_wind::NoWind;
+use crate::simulation::windtactics::periodic_wind::PeriodicWind;
+use crate::simulation::movetactics::move_linear::MoveLinear;
+use crate::simulation::movetactics::move_stop::MoveStop;
+use crate::simulation::movetactics::move_squares::MoveSquares;
 
 
 pub enum Step {
@@ -269,7 +273,6 @@ impl<'a> Step {
                                 let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
                                 debug.save_to_file = Some(format!("video_{}.mp4", seconds));
                                 debug.save_commands = Some(format!("commands_{}.txt", seconds));
-                                debug.counteract_velocity = true;
                                 debug
                             }
                         };
@@ -302,9 +305,11 @@ impl<'a> Step {
                         *join_handle = Some(thread::spawn(move || {
                             let mut hf = HatFollower::new(
                                 NaiveDetector::new(hat),
-                                VirtualController::new(50.0, 0,
-                                                       StandStill::new(),
-                                                        ConstantWind::new_polar(2.5, 3.81), false),
+                                VirtualController::new(20.0, 1, 1.0,
+                                                       MoveSquares::new(0.7, 500),
+                                                       // StandStill::new(),
+                                                        // NoWind::new(), false),
+                                                        PeriodicWind::new_polar(3.0, 3.81, 100, 2000), false),
                                 // ParrotController::new(300, true),
                                 KalmanFilter::new(sigma0, sigma_gain, est_v_loss),
                                 settings,

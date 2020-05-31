@@ -7,6 +7,7 @@ use rust_drone_follow::geometric_point::GeometricPoint;
 use rust_drone_follow::marker_drawer::MarkerDrawer;
 use rust_drone_follow::opencv_custom::get_blue;
 use rulinalg::matrix::{Matrix};
+use opencv::core::Scalar;
 
 pub struct KalmanFilter {
     filter: KF,
@@ -28,13 +29,13 @@ impl KalmanFilter {
                 // Process noise covariance
                 q: Matrix::new(5, 5, vec![ 1.0, 0.0, 0.0, 0.0, 0.0,
                                            0.0, 1.0, 0.0, 0.0, 0.0,
-                                           0.0, 0.0, 1.0, 0.0, 0.0,
+                                           0.0, 0.0, 2.0, 0.0, 0.0,
                                            0.0, 0.0, 0.0, 1.0, 0.0,
                                            0.0, 0.0, 0.0, 0.0, 1.0 ]),
                 // Measurement noise matrix
-                r: Matrix::new(3, 3, vec![ 5.0, 0.0, 0.0,
-                                           0.0, 5.0, 0.0,
-                                           0.0, 0.0, 10.0 ]),
+                r: Matrix::new(3, 3, vec![ 10.0, 0.0, 0.0,
+                                           0.0, 10.0, 0.0,
+                                           0.0, 0.0, 0.001 ]),
                 // Observation matrix
                 h: Matrix::new(3, 5, vec![1.0, 0.0, 0.0, 0.0, 0.0,
                         0.0, 1.0, 0.0, 0.0, 0.0,
@@ -82,7 +83,7 @@ impl Filter for KalmanFilter {
                     );
 
                     self.point = Some(GeometricPoint::new(next.x[0] as i32, next.x[1] as i32));
-                    self.angle = next.x[3];
+                    self.angle = next.x[2];
                     self.state = next;
                 }
             }
@@ -115,6 +116,11 @@ impl Filter for KalmanFilter {
     fn draw_on_image(&self, m_d: &mut MarkerDrawer) {
         if let Some(p) = &self.point {
             m_d.point(p, get_blue());
+
+            let k = 10;
+            let other_point = GeometricPoint::new(p.x + k, p.y + (k as f64 * self.angle.max(-1.57).min(1.57).tan()) as i32);
+
+            m_d.line(p, &other_point, Scalar::new(255.0, 255.0, 255.0, 255.0));
         }
     }
 }

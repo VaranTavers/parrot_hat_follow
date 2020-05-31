@@ -32,12 +32,13 @@ impl PeriodicWind {
 
 impl WindTactic for PeriodicWind {
     fn get_wind(&mut self) -> (f64, f64) {
+        self.frame_num += 1;
         if self.frame_num < self.active {
             return (self.speed_x, self.speed_y);
         }
-        self.frame_num += 1;
         if self.frame_num > self.active + self.inactive {
             self.frame_num = 0;
+            println!("Wind on!");
         }
         (0.0, 0.0)
     }
