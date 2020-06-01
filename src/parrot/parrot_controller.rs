@@ -2,11 +2,13 @@ use std::thread;
 use std::time::Duration;
 use std::mem;
 
-use rust_drone_follow::traits::Controller;
-use rust_drone_follow::text_exporter::TextExporter;
-use parrot_ar_drone::{Drone, NavDataValue};
 use opencv::videoio::{VideoCapture, CAP_ANY, VideoCaptureTrait};
 use opencv::core::Mat;
+
+use rust_drone_follow::traits::Controller;
+use rust_drone_follow::utils::TextExporter;
+
+use parrot_ar_drone::{Drone, NavDataValue};
 
 pub struct ParrotController {
     print_debug: bool,

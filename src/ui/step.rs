@@ -5,13 +5,13 @@ use std::thread::JoinHandle;
 
 use iced::{button, text_input, Element, Column};
 
-use rust_drone_follow::hat::Hat;
-use rust_drone_follow::traits::Controller;
 use rust_drone_follow::HatFollower;
+use rust_drone_follow::HatFollowerSettings;
+use rust_drone_follow::traits::Controller;
 use rust_drone_follow::detectors::naive_detector::NaiveDetector;
-use rust_drone_follow::hat_file_reader::read_file;
-use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
-use rust_drone_follow::text_exporter::TextExporter;
+use rust_drone_follow::models::Hat;
+use rust_drone_follow::utils::hat_file_reader::read_file;
+use rust_drone_follow::utils::TextExporter;
 
 use super::step_message::{StepMessage, DefaultSetting};
 use super::view::welcome::welcome;
@@ -26,10 +26,10 @@ use crate::utils::picture_funcs::{get_color_from_strings, mask_image};
 
 use crate::parrot::parrot_controller::ParrotController;
 
+use crate::kalman_filter::KalmanFilter;
+
 use crate::simulation::virtual_controller::VirtualController;
 use crate::simulation::movetactics::stand_still::StandStill;
-
-use crate::kalman_filter::KalmanFilter;
 use crate::simulation::windtactics::constant_wind::ConstantWind;
 use crate::simulation::windtactics::no_wind::NoWind;
 use crate::simulation::windtactics::periodic_wind::PeriodicWind;
@@ -301,15 +301,16 @@ impl<'a> Step {
 
                         let (sx, rx) = std::sync::mpsc::channel();
                         let (_, hat) = read_file("config.hat");
+                        settings.turn_only_when_centered = false;
                         // TODO: Load all files
                         *join_handle = Some(thread::spawn(move || {
                             let mut hf = HatFollower::new(
                                 NaiveDetector::new(hat),
-                                VirtualController::new(20.0, 1, 1.0,
+                                VirtualController::new(20.0, 1, 0.01,
                                                        MoveSquares::new(0.7, 500),
                                                        // StandStill::new(),
                                                         // NoWind::new(), false),
-                                                        PeriodicWind::new_polar(3.0, 3.81, 100, 2000), false),
+                                                        PeriodicWind::new_polar(3.0, 3.81, 150, 2000), false),
                                 // ParrotController::new(300, true),
                                 KalmanFilter::new(sigma0, sigma_gain, est_v_loss),
                                 settings,

@@ -1,17 +1,20 @@
+use std::f64::consts::PI;
+
 use rust_drone_follow::traits::Controller;
-use rust_drone_follow::text_exporter::TextExporter;
-use rust_drone_follow::opencv_custom::{get_red, get_green};
-use rust_drone_follow::point_converter::PointConverter;
-use rust_drone_follow::geometric_point::GeometricPoint;
+
+use rust_drone_follow::utils::TextExporter;
+use rust_drone_follow::utils::opencv_custom::{get_red, get_green};
+use rust_drone_follow::utils::PointConverter;
+
+use rust_drone_follow::models::GeometricPoint;
 
 use opencv::imgproc::{circle, LINE_8};
 use opencv::core::{Mat, CV_8UC3, MatExprTrait, Scalar};
 
 use crate::simulation::traits::MoveTactic;
 use crate::simulation::traits::WindTactic;
-use iced::Application;
+
 use rand::Rng;
-use std::f64::consts::PI;
 
 
 pub struct VirtualController<M: MoveTactic, W: WindTactic> {
@@ -36,7 +39,7 @@ impl<M: MoveTactic, W: WindTactic> VirtualController<M, W> {
             te: TextExporter::new(),
             drone: (0.0, 0.0, 1.57),
             drone_v: (0.0, 0.0, 0.0),
-            hat: (30.0, 45.0, 1.57), //1.57
+            hat: (30.0, 45.0, 0.0), //1.57
             speed,
             skip_frames,
             instability,
@@ -101,7 +104,7 @@ impl<M: MoveTactic, W: WindTactic> Controller for VirtualController<M, W> {
                              format!("{}, {}, {}, {}", left_right, back_front, down_up, turn_left_right));
         }
         let (old_vx, old_vy, old_va) = self.drone_v;
-        self.drone_v = ((old_vx + left_right) / 2.0, (old_vy + back_front) / 2.0, (old_va - turn_left_right) / 2.0);
+        self.drone_v = ((old_vx + left_right) / 2.0, (old_vy + back_front) / 2.0, (old_va + turn_left_right) / 2.0);
     }
 
     fn stop(&mut self) {
@@ -155,6 +158,6 @@ impl<M: MoveTactic, W: WindTactic> Controller for VirtualController<M, W> {
     fn get_ka(&self) -> f64 {
         // Turning is currently turned off.
         // TODO: NEEDS TESTING
-        0.0
+        0.00
     }
 }

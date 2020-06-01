@@ -1,13 +1,16 @@
-
 use rulinalg::vector::Vector;
+use rulinalg::matrix::{Matrix};
+
 use linearkalman::{KalmanFilter as KF, filter_step};
 use linearkalman::KalmanState as KS;
-use rust_drone_follow::traits::Filter;
-use rust_drone_follow::geometric_point::GeometricPoint;
-use rust_drone_follow::marker_drawer::MarkerDrawer;
-use rust_drone_follow::opencv_custom::get_blue;
-use rulinalg::matrix::{Matrix};
+
 use opencv::core::Scalar;
+
+use rust_drone_follow::traits::Filter;
+use rust_drone_follow::models::GeometricPoint;
+use rust_drone_follow::utils::MarkerDrawer;
+use rust_drone_follow::utils::opencv_custom::get_blue;
+
 
 pub struct KalmanFilter {
     filter: KF,

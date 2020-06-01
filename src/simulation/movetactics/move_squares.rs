@@ -1,6 +1,8 @@
-use crate::simulation::traits::MoveTactic;
-use rust_drone_follow::geometric_point::GeometricPoint;
 use std::f64::consts::PI;
+
+use crate::simulation::traits::MoveTactic;
+
+use rust_drone_follow::models::GeometricPoint;
 
 pub struct MoveSquares {
     speed: f64,

@@ -3,7 +3,6 @@ use opencv::videoio::{VideoCapture, CAP_ANY, VideoCaptureTrait};
 use opencv::core::{Mat, Size, CV_8U, MatExprTrait};
 use opencv::imgcodecs::imwrite;
 use opencv::types::VectorOfi32;
-use opencv::prelude::Vector;
 use opencv::highgui::imshow;
 
 pub fn picture_recorder(rec: Receiver<i32>, url: String) {

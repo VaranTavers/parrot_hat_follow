@@ -1,5 +1,6 @@
 use crate::simulation::traits::MoveTactic;
-use rust_drone_follow::geometric_point::GeometricPoint;
+
+use rust_drone_follow::models::GeometricPoint;
 
 pub struct StandStill {
 

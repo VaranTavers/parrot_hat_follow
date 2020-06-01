@@ -2,9 +2,9 @@ use std::time::{SystemTime, UNIX_EPOCH, Duration};
 use std::{thread, io};
 use std::num::ParseIntError;
 
-use rust_drone_follow::hat_follower_settings::HatFollowerSettings;
-use rust_drone_follow::hat_file_reader::read_file;
 use rust_drone_follow::HatFollower;
+use rust_drone_follow::HatFollowerSettings;
+use rust_drone_follow::utils::hat_file_reader::read_file;
 use rust_drone_follow::detectors::naive_detector::NaiveDetector;
 use rust_drone_follow::controllers::mock_controller::MockController;
 
