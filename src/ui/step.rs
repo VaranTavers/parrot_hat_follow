@@ -1,42 +1,26 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use std::{thread, fs};
+use std::{thread};
 use std::sync::mpsc::Sender;
 use std::thread::JoinHandle;
 
 use iced::{button, text_input, Element, Column};
 
-use rust_drone_follow::HatFollower;
-use rust_drone_follow::HatFollowerSettings;
 use rust_drone_follow::traits::Controller;
-use rust_drone_follow::detectors::naive_detector::NaiveDetector;
 use rust_drone_follow::models::Hat;
-use rust_drone_follow::utils::hat_file_reader::read_file;
 use rust_drone_follow::utils::TextExporter;
 
 use super::step_message::{StepMessage, DefaultSetting};
-use super::view::welcome::welcome;
-use super::view::get_picture::get_picture;
-use super::view::set_hat_color::set_hat_color;
-use super::view::set_kalman_settings::set_kalman_settings;
-use super::view::set_follower_settings::set_follower_settings;
-use super::view::run::run;
+use super::view::welcome;
+use super::view::get_picture;
+use super::view::set_hat_color;
+use super::view::set_kalman_settings;
+use super::view::set_follower_settings;
+use super::view::run;
 
 use crate::utils::picture_recorder::picture_recorder;
 use crate::utils::picture_funcs::{get_color_from_strings, mask_image};
 
 use crate::parrot::parrot_controller::ParrotController;
-
-use crate::kalman_filter::KalmanFilter;
-
-use crate::simulation::virtual_controller::VirtualController;
-use crate::simulation::movetactics::stand_still::StandStill;
-use crate::simulation::windtactics::constant_wind::ConstantWind;
-use crate::simulation::windtactics::no_wind::NoWind;
-use crate::simulation::windtactics::periodic_wind::PeriodicWind;
-use crate::simulation::movetactics::move_linear::MoveLinear;
-use crate::simulation::movetactics::move_stop::MoveStop;
-use crate::simulation::movetactics::move_squares::MoveSquares;
-
 
 pub enum Step {
     Welcome,
@@ -239,15 +223,9 @@ impl<'a> Step {
                 if let Step::SetFollowerSettings {setting, center_threshold, min_change, ..} = self {
                     let mut text_exporter = TextExporter::new();
                     let setting_str = match setting {
-                        Some(DefaultSetting::Video) => {
-                            "Video"
-                        }
-                        Some(DefaultSetting::Silent) => {
-                            "Silent"
-                        }
-                        _ => {
-                            "Debug"
-                        }
+                        Some(DefaultSetting::Video) => "Video",
+                        Some(DefaultSetting::Silent) => "Silent",
+                        _ => "Debug"
                     };
                     text_exporter.save_row("config.follow", format!("{} {} {}", setting_str, center_threshold, min_change));
                 }
@@ -256,68 +234,8 @@ impl<'a> Step {
             StepMessage::Start => {
                 if let Step::Run {join_handle, sender_channel, ..} = self {
                     if join_handle.is_none() {
-
-                        let follower_content = fs::read_to_string("config.follow")
-                            .expect("Something went wrong reading the config.follower file");
-                        let follower_args: Vec<&str> = follower_content.split(' ').collect::<Vec<&str>>();
-                        let kalman_content = fs::read_to_string("config.kalman")
-                            .expect("Something went wrong reading config.kalman the file");
-                        let kalman_args: Vec<&str> = kalman_content.split(' ').collect::<Vec<&str>>();
-
-                        let mut settings = match follower_args[0] {
-                            "Video" => HatFollowerSettings::new(),
-                            "Silent" => HatFollowerSettings::silent(),
-                            _ => {
-                                let mut debug = HatFollowerSettings::debug();
-                                let system_time = SystemTime::now();
-                                let seconds = system_time.duration_since(UNIX_EPOCH).unwrap().as_secs();
-                                debug.save_to_file = Some(format!("video_{}.mp4", seconds));
-                                debug.save_commands = Some(format!("commands_{}.txt", seconds));
-                                debug
-                            }
-                        };
-                        settings.center_threshold = match follower_args[1].trim().parse::<f64>() {
-                            Ok(ct) => ct,
-                            _ => 10.0
-                        };
-                        settings.min_change = match follower_args[2].trim().parse::<f64>() {
-                            Ok(mc) => mc,
-                            _ => 0.1
-                        };
-
-                        let sigma0 = match kalman_args[0].trim().parse::<f64>() {
-                            Ok(mc) => mc,
-                            _ => 1.0
-                        };
-                        let sigma_gain = match kalman_args[1].trim().parse::<f64>() {
-                            Ok(mc) => mc,
-                            _ => 1.1
-                        };
-                        let est_v_loss = match follower_args[2].trim().parse::<f64>() {
-                            Ok(mc) => mc,
-                            _ => 1.0
-                        };
-
-
-                        let (sx, rx) = std::sync::mpsc::channel();
-                        let (_, hat) = read_file("config.hat");
-                        settings.turn_only_when_centered = false;
-                        // TODO: Load all files
-                        *join_handle = Some(thread::spawn(move || {
-                            let mut hf = HatFollower::new(
-                                NaiveDetector::new(hat),
-                                VirtualController::new(20.0, 1, 0.01,
-                                                       MoveSquares::new(0.7, 500),
-                                                       // StandStill::new(),
-                                                        // NoWind::new(), false),
-                                                        PeriodicWind::new_polar(3.0, 3.81, 150, 2000), false),
-                                // ParrotController::new(300, true),
-                                KalmanFilter::new(sigma0, sigma_gain, est_v_loss),
-                                settings,
-                                Some(rx)
-                            );
-                            hf.run();
-                        }));
+                        let (handle, sx) = crate::ui::controller::start_follow();
+                        *join_handle = Some(handle);
                         *sender_channel = Some(sx);
                     }
                 }

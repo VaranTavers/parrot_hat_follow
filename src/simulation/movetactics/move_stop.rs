@@ -1,7 +1,5 @@
 use crate::simulation::traits::MoveTactic;
 
-use rust_drone_follow::models::GeometricPoint;
-
 pub struct MoveStop {
     speed: f64,
     switch_time: u32,

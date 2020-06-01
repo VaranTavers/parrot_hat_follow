@@ -4,3 +4,4 @@ pub mod tour;
 
 // Phases
 pub mod view;
+pub mod controller;

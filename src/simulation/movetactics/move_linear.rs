@@ -1,7 +1,5 @@
 use crate::simulation::traits::MoveTactic;
 
-use rust_drone_follow::models::GeometricPoint;
-
 pub struct MoveLinear {
     speed_x: f64,
     speed_y: f64,
