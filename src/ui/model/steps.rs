@@ -1,7 +1,7 @@
 use iced::{button, text_input, Element};
 
 use crate::ui::step::Step;
-use crate::ui::model::StepMessage;
+use crate::ui::model::{StepMessage, WindSetting, PersonSetting};
 
 pub struct Steps {
     steps: Vec<Step>,
@@ -15,8 +15,8 @@ impl Steps {
                 Step::Welcome,
                 Step::SetController {
                     cs: None,
-                    ws: None,
-                    ps: None,
+                    ws: Some(WindSetting::PeriodicWind),
+                    ps: Some(PersonSetting::StandStill),
                     save_controller: button::State::new(),
                 },
                 Step::GetPicture {

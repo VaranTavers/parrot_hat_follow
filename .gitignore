@@ -11,5 +11,4 @@ follow.iml
 *.hat
 *.jpg
 /oldHats
-config.follow
-config.kalman
+config.*

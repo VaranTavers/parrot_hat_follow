@@ -22,6 +22,7 @@ pub fn set_controller_settings<'a>(container: Column<'a, StepMessage>,
                     ))
                 },
             )))
+        /*
         .push(Column::new().align_items(Align::Start).spacing(10)
             .push(Text::new("Virtual Wind:"))
             .push(WindSetting::all().iter().cloned().fold(
@@ -48,5 +49,6 @@ pub fn set_controller_settings<'a>(container: Column<'a, StepMessage>,
                     ))
                 },
             )))
+         */
         .push(Button::new(si, Text::new("Save")).padding(15).on_press(StepMessage::SaveController))
 }

@@ -10,6 +10,7 @@ use rust_drone_follow::models::Hat;
 use rust_drone_follow::utils::TextExporter;
 
 use super::view::welcome;
+use super::view::set_controller_settings;
 use super::view::get_picture;
 use super::view::set_hat_color;
 use super::view::set_kalman_settings;
@@ -104,9 +105,9 @@ impl<'a> Step {
             StepMessage::SaveController => {
                 if let Step::SetController {cs, ws, ps, ..} = self {
                     let mut text_exporter = TextExporter::new();
-                    text_exporter.save_row("config.controller", format!("{}\n", cs.unwrap()));
-                    text_exporter.save_row("config.controller", format!("{}\n", ws.unwrap()));
-                    text_exporter.save_row("config.controller", format!("{}", ps.unwrap()));
+                    text_exporter.save_row("config.controller", format!("{}\n", String::from(cs.unwrap())));
+                    text_exporter.save_row("config.controller", format!("{}\n", String::from(ws.unwrap())));
+                    text_exporter.save_row("config.controller", format!("{}", String::from(ps.unwrap())));
                 }
             }
             StepMessage::Takeoff => {
@@ -310,7 +311,9 @@ impl<'a> Step {
     pub fn view(&mut self) -> Element<StepMessage> {
         match self {
             Step::Welcome => welcome(Self::container()),
-            Step::SetController {cs, ws, ps, save_controller} => set_controller_settings(Self::container(), save_controller, (cs, ws, ps)),
+            Step::SetController { cs, ws, ps, save_controller } => {
+                set_controller_settings(Self::container(), save_controller, (cs.clone(), ws.clone(), ps.clone()))
+            },
             Step::GetPicture { takeoff_state, picture_state, land_state, .. } => {
                 get_picture(Self::container(), (takeoff_state, picture_state, land_state))
             }
