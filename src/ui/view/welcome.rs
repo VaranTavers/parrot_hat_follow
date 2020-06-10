@@ -1,6 +1,6 @@
 use iced::{Column, Text};
 
-use crate::ui::step_message::StepMessage;
+use crate::ui::model::StepMessage;
 
 pub fn welcome<'a>(container: Column<'a, StepMessage>) -> Column<'a, StepMessage> {
     container

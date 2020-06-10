@@ -1,7 +1,7 @@
 use iced::{Column, Text, Button, Align};
 use iced::button::State as ButtonState;
 
-use crate::ui::step_message::StepMessage;
+use crate::ui::model::StepMessage;
 
 pub fn run<'a>(container: Column<'a, StepMessage>, (start_state, stop_state): (&'a mut ButtonState, &'a mut ButtonState)) -> Column<'a, StepMessage> {
     container

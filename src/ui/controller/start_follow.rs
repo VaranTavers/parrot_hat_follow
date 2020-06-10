@@ -8,11 +8,12 @@ use rust_drone_follow::detectors::NaiveDetector;
 
 use crate::kalman_filter::KalmanFilter;
 
+use crate::utils::file_readers::{read_follow_file, read_kalman_file};
+
 use crate::simulation::virtual_controller::VirtualController;
 use crate::simulation::movetactics::move_squares::MoveSquares;
 use crate::simulation::windtactics::periodic_wind::PeriodicWind;
-
-use crate::utils::file_readers::{read_follow_file, read_kalman_file};
+use crate::simulation::windtactics::random_wind::RandomWind;
 
 pub fn start_follow() -> (JoinHandle<()>, Sender<i32>) {
     let settings = read_follow_file("config.follow");
@@ -27,7 +28,8 @@ pub fn start_follow() -> (JoinHandle<()>, Sender<i32>) {
                                    MoveSquares::new(0.7, 500),
                                    // StandStill::new(),
                                    // NoWind::new(), false),
-                                   PeriodicWind::new_polar(3.0, 3.81, 150, 2000), false),
+                                   RandomWind::new_polar(3.0, 150, 2000), false),
+                                    // PeriodicWind::new_polar(3.0, 3.81, 150, 2000), false),
             // ParrotController::new(300, true),
             KalmanFilter::new(sigma0, sigma_gain, est_v_loss),
             settings,

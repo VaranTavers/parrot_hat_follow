@@ -2,7 +2,7 @@ use iced::{Column, Text, Button, TextInput, Radio, Align};
 use iced::text_input::State as TIS;
 use iced::button::State as ButtonState;
 
-use crate::ui::step_message::{StepMessage, DefaultSetting};
+use crate::ui::model::{StepMessage, DefaultSetting};
 
 pub fn set_follower_settings<'a>(container: Column<'a, StepMessage>,
                                  (mcs, cts): (&String, &String),

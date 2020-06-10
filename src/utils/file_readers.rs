@@ -20,6 +20,7 @@ pub fn read_follow_file(filename: &str) -> HatFollowerSettings {
         }
     };
 
+    settings.turn_range = 0.01;
     settings.center_threshold = match follower_args[1].trim().parse::<f64>() {
         Ok(ct) => ct,
         _ => 10.0
@@ -28,7 +29,6 @@ pub fn read_follow_file(filename: &str) -> HatFollowerSettings {
         Ok(mc) => mc,
         _ => 0.1
     };
-    settings.turn_only_when_centered = false;
 
     settings
 }

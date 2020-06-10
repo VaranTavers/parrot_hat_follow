@@ -158,6 +158,6 @@ impl<M: MoveTactic, W: WindTactic> Controller for VirtualController<M, W> {
     fn get_ka(&self) -> f64 {
         // Turning is currently turned off.
         // TODO: NEEDS TESTING
-        0.00
+        0.01
     }
 }

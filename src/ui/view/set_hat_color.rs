@@ -2,7 +2,7 @@ use iced::{Column, Text, Button, Row, Align, TextInput, Length, Image};
 use iced::text_input::State as TIS;
 use iced::button::State as ButtonState;
 
-use crate::ui::step_message::StepMessage;
+use crate::ui::model::StepMessage;
 
 pub fn set_hat_color<'a>(container: Column<'a, StepMessage>,
                          (hls, has, hbs, lls, las, lbs, size): (&String, &String, &String, &String, &String, &String, &String),

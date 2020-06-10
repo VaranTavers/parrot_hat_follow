@@ -9,13 +9,14 @@ use rust_drone_follow::traits::Controller;
 use rust_drone_follow::models::Hat;
 use rust_drone_follow::utils::TextExporter;
 
-use super::step_message::{StepMessage, DefaultSetting};
 use super::view::welcome;
 use super::view::get_picture;
 use super::view::set_hat_color;
 use super::view::set_kalman_settings;
 use super::view::set_follower_settings;
 use super::view::run;
+
+use crate::ui::model::{StepMessage, DefaultSetting};
 
 use crate::utils::picture_recorder::picture_recorder;
 use crate::utils::picture_funcs::{get_color_from_strings, mask_image};
