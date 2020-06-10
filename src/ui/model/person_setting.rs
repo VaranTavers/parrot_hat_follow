@@ -1,26 +1,26 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WindSetting {
-    NoWind,
-    PeriodicWind,
-    RandomWind,
+pub enum PersonSetting {
+    StandStill,
+    MoveStop,
+    MoveSquares,
 }
 
-impl WindSetting {
-    pub fn all() -> [WindSetting; 3] {
+impl PersonSetting {
+    pub fn all() -> [PersonSetting; 3] {
         [
-            WindSetting::NoWind,
-            WindSetting::PeriodicWind,
-            WindSetting::RandomWind,
+            PersonSetting::StandStill,
+            PersonSetting::MoveStop,
+            PersonSetting::MoveSquares,
         ]
     }
 }
 
-impl From<WindSetting> for String {
-    fn from(setting: WindSetting) -> String {
+impl From<PersonSetting> for String {
+    fn from(setting: PersonSetting) -> String {
         String::from(match setting {
-            WindSetting::NoWind       => "NoWind",
-            WindSetting::PeriodicWind => "PeriodicWind",
-            WindSetting::RandomWind   => "RandomWind",
+            PersonSetting::StandStill   => "StandStill",
+            PersonSetting::MoveStop     => "MoveStop",
+            PersonSetting::MoveSquares  => "MoveSquares",
         })
     }
 }

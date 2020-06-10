@@ -1,26 +1,23 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DefaultSetting {
-    Video,
-    Debug,
-    Silent
+pub enum ControllerSetting {
+    ParrotController,
+    VirtualController
 }
 
-impl DefaultSetting {
-    pub fn all() -> [DefaultSetting; 3] {
+impl ControllerSetting {
+    pub fn all() -> [ControllerSetting; 2] {
         [
-            DefaultSetting::Video,
-            DefaultSetting::Debug,
-            DefaultSetting::Silent,
+            ControllerSetting::ParrotController,
+            ControllerSetting::VirtualController,
         ]
     }
 }
 
-impl From<DefaultSetting> for String {
-    fn from(setting: DefaultSetting) -> String {
+impl From<ControllerSetting> for String {
+    fn from(setting: ControllerSetting) -> String {
         String::from(match setting {
-            DefaultSetting::Video => "Video",
-            DefaultSetting::Debug => "Debug",
-            DefaultSetting::Silent => "Silent"
+            ControllerSetting::ParrotController => "ParrotController",
+            ControllerSetting::VirtualController => "VirtualController",
         })
     }
 }

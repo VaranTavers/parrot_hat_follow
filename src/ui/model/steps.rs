@@ -13,6 +13,7 @@ impl Steps {
         Steps {
             steps: vec![
                 Step::Welcome,
+
                 Step::GetPicture {
                     drone: None,
                     takeoff_state: button::State::new(),

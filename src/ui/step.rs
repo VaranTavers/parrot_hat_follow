@@ -16,7 +16,7 @@ use super::view::set_kalman_settings;
 use super::view::set_follower_settings;
 use super::view::run;
 
-use crate::ui::model::{StepMessage, DefaultSetting};
+use crate::ui::model::{StepMessage, DefaultSetting, ControllerSetting, WindSetting, PersonSetting};
 
 use crate::utils::picture_recorder::picture_recorder;
 use crate::utils::picture_funcs::{get_color_from_strings, mask_image};
@@ -25,6 +25,12 @@ use crate::parrot::parrot_controller::ParrotController;
 
 pub enum Step {
     Welcome,
+    SetController {
+        cs: Option<ControllerSetting>,
+        ws: Option<WindSetting>,
+        ps: Option<PersonSetting>,
+        save_controller: button::State,
+    },
     GetPicture {
         drone: Option<ParrotController>,
         takeoff_state: button::State,
@@ -80,6 +86,29 @@ pub enum Step {
 impl<'a> Step {
     pub fn update(&mut self, msg: StepMessage) {
         match msg {
+            StepMessage::SetController(controller) => {
+                if let Step::SetController {cs, ..} = self {
+                    *cs = Some(controller);
+                }
+            },
+            StepMessage::SetWind(wind) => {
+                if let Step::SetController {ws, ..} = self {
+                    *ws = Some(wind);
+                }
+            },
+            StepMessage::SetPerson(person) => {
+                if let Step::SetController {ps, ..} = self {
+                    *ps = Some(person);
+                }
+            },
+            StepMessage::SaveController => {
+                if let Step::SetController {cs, ws, ps, ..} = self {
+                    let mut text_exporter = TextExporter::new();
+                    text_exporter.save_row("config.controller", format!("{}\n", cs.unwrap()));
+                    text_exporter.save_row("config.controller", format!("{}\n", ws.unwrap()));
+                    text_exporter.save_row("config.controller", format!("{}", ps.unwrap()));
+                }
+            }
             StepMessage::Takeoff => {
                 if let Step::GetPicture {drone, sender_channel, join_handle, ..} = self {
                     if drone.is_none() {
@@ -258,6 +287,7 @@ impl<'a> Step {
     pub fn title(&self) -> &str {
         match self {
             Step::Welcome => "Welcome",
+            Step::SetController {..} => "Settings: Controller",
             Step::GetPicture {..} => "Settings: Picture",
             Step::SetHatColor {..} => "Settings: Color",
             Step::SetKalmanSettings {..} => "Settings: Kalman filter",
@@ -280,6 +310,7 @@ impl<'a> Step {
     pub fn view(&mut self) -> Element<StepMessage> {
         match self {
             Step::Welcome => welcome(Self::container()),
+            Step::SetController {cs, ws, ps, save_controller} => set_controller_settings(Self::container(), save_controller, (cs, ws, ps)),
             Step::GetPicture { takeoff_state, picture_state, land_state, .. } => {
                 get_picture(Self::container(), (takeoff_state, picture_state, land_state))
             }

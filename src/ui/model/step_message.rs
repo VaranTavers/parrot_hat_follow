@@ -1,7 +1,11 @@
-use crate::ui::model::DefaultSetting;
+use crate::ui::model::{DefaultSetting, ControllerSetting, WindSetting, PersonSetting};
 
 #[derive(Debug, Clone)]
 pub enum StepMessage {
+    SetController(ControllerSetting),
+    SetWind(WindSetting),
+    SetPerson(PersonSetting),
+    SaveController,
     Takeoff,
     TakePicture,
     Land,
