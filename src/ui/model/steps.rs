@@ -13,7 +13,12 @@ impl Steps {
         Steps {
             steps: vec![
                 Step::Welcome,
-
+                Step::SetController {
+                    cs: None,
+                    ws: None,
+                    ps: None,
+                    save_controller: button::State::new(),
+                },
                 Step::GetPicture {
                     drone: None,
                     takeoff_state: button::State::new(),
